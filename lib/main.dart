@@ -239,7 +239,10 @@ class _CameraExampleHomeState extends State<CameraExampleHome> {
           data: formData,
           options: reqOptions
       );
-      print("response" + response.toString());
+      print("hello");
+      List<ClassifiedObject> resObj = convertJsonTOObject(response.toString());
+//      print("response" + response.toString());
+      print("response" + resObj.toString());
     } on CameraException catch (e) {
       _showCameraException(e);
       return null;
@@ -251,6 +254,38 @@ class _CameraExampleHomeState extends State<CameraExampleHome> {
     logError(e.code, e.description);
     showInSnackBar('Error: ${e.code}\n${e.description}');
   }
+}
+
+
+  /// A function that will convert a response body into a List<ClassifiedObject>
+  List<ClassifiedObject> convertJsonTOObject(String responseBody) {
+    final parsed = json.decode(responseBody).cast<Map<String, dynamic>>();
+
+    return parsed.map<ClassifiedObject>((json) => ClassifiedObject.fromJson(json)).toList();
+}
+//class Post {
+//
+//   final List<ClassifiedObject> resultSet;
+//   Post({this.resultSet});
+//   factory Post.fromJson(Map<String, dynamic> json) {
+//     var list = json['results'] as List;
+//     return new Post(
+//
+//     );
+//   }
+//}
+
+class ClassifiedObject {
+   final String label;
+   final dynamic score;
+   ClassifiedObject({this.label, this.score});
+   factory ClassifiedObject.fromJson(Map<String, dynamic> parsedJson){
+     return ClassifiedObject(
+         label:parsedJson['label'],
+         score:parsedJson['score']
+     );
+   }
+
 }
 
 class CameraApp extends StatelessWidget {
