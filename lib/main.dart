@@ -164,7 +164,7 @@ class _CameraExampleHomeState extends State<CameraExampleHome> {
   }
 
   Widget _PredictedBinImageWidget() {
-    
+
   }
 
   String timestamp() => new DateTime.now().millisecondsSinceEpoch.toString();
