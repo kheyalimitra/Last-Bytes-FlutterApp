@@ -5,6 +5,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter/services.dart';
 
 class CameraExampleHome extends StatefulWidget {
   @override
@@ -162,6 +163,10 @@ class _CameraExampleHomeState extends State<CameraExampleHome> {
     return new Row(children: toggles);
   }
 
+  Widget _PredictedBinImageWidget() {
+    
+  }
+
   String timestamp() => new DateTime.now().millisecondsSinceEpoch.toString();
 
   void showInSnackBar(String message) {
@@ -239,10 +244,8 @@ class _CameraExampleHomeState extends State<CameraExampleHome> {
           data: formData,
           options: reqOptions
       );
-      print("hello");
-      List<ClassifiedObject> resObj = convertJsonTOObject(response.toString());
-//      print("response" + response.toString());
-      print("response" + resObj.toString());
+      String binImageName = parseResponseToGetBinName(response);
+
     } on CameraException catch (e) {
       _showCameraException(e);
       return null;
@@ -257,36 +260,45 @@ class _CameraExampleHomeState extends State<CameraExampleHome> {
 }
 
 
-  /// A function that will convert a response body into a List<ClassifiedObject>
-  List<ClassifiedObject> convertJsonTOObject(String responseBody) {
-    final parsed = json.decode(responseBody).cast<Map<String, dynamic>>();
+  /// A function that will convert a response body into a List<ClassifiedObject> and then map the image name
+  String parseResponseToGetBinName(Response responseBody) {
+    List<String> classificationList = new List();
+    Map parsedJsonObj = jsonDecode(responseBody.data);
+    for (var entry in parsedJsonObj["result"]) {
+        classificationList.add(entry.values.first);
+    }
+    return getBinImageName (classificationList);
 
-    return parsed.map<ClassifiedObject>((json) => ClassifiedObject.fromJson(json)).toList();
 }
-//class Post {
-//
-//   final List<ClassifiedObject> resultSet;
-//   Post({this.resultSet});
-//   factory Post.fromJson(Map<String, dynamic> json) {
-//     var list = json['results'] as List;
-//     return new Post(
-//
-//     );
-//   }
-//}
 
-class ClassifiedObject {
-   final String label;
-   final dynamic score;
-   ClassifiedObject({this.label, this.score});
-   factory ClassifiedObject.fromJson(Map<String, dynamic> parsedJson){
-     return ClassifiedObject(
-         label:parsedJson['label'],
-         score:parsedJson['score']
-     );
+String getBinImageName (classificationList) {
+
+//  for (String label in classificationList) {
+   switch(classificationList[0]) {
+     case "foodscrape":
+       return "foodscrape.jpg";
+     case "cardboard cartoon" :
+     case "paper":
+     case "news paper":
+     case "napkin":
+     case "paper cup":
+      return "paper.png";
+     case "plastic bag":
+     case "plastic cup":
+     case "plastic box":
+     case "plastic container":
+       return "plastic.png";
+     case "glass":
+     case "glass bottle":
+       return "glass.png";
+     case "metal can":
+       return "metal.png";
+     default:
+       return "landfill.jpg";
    }
-
+//  }
 }
+
 
 class CameraApp extends StatelessWidget {
   @override
