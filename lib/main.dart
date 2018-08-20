@@ -5,7 +5,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:dio/dio.dart';
-import 'package:flutter/services.dart';
+
 
 class CameraExampleHome extends StatefulWidget {
   @override
@@ -70,8 +70,8 @@ class _CameraExampleHomeState extends State<CameraExampleHome> {
             child: new Row(
               mainAxisAlignment: MainAxisAlignment.start,
               children: <Widget>[
-                _cameraTogglesRowWidget(),
-                _thumbnailWidget(),
+                _cameraTogglesRowWidget()
+//                _thumbnailWidget()
               ],
             ),
           ),
@@ -108,13 +108,12 @@ class _CameraExampleHomeState extends State<CameraExampleHome> {
             : new SizedBox(
           child:
           new Image.file(new File(imagePath)),
-          width: 200.0,
-          height: 200.0,
+          width: 350.0,
+          height: 350.0,
         ),
       ),
     );
   }
-
 
   /// Display the control bar with buttons to take pictures and record videos.
   Widget _captureControlRowWidget() {
@@ -163,9 +162,6 @@ class _CameraExampleHomeState extends State<CameraExampleHome> {
     return new Row(children: toggles);
   }
 
-  Widget _PredictedBinImageWidget() {
-
-  }
 
   String timestamp() => new DateTime.now().millisecondsSinceEpoch.toString();
 
@@ -205,9 +201,54 @@ class _CameraExampleHomeState extends State<CameraExampleHome> {
         setState(() {
           imagePath = filePath;
         });
-        if (filePath != null) showInSnackBar('Picture saved to $filePath');
+       if (filePath != null) {
+         classifyAndDisplay(filePath);
+       }
       }
     });
+  }
+
+  Future<String> classifyAndDisplay(filePath) async {
+    Map<String, dynamic> reqHeaders = new Map<String, dynamic>();
+    Map<String, dynamic> uploadFile = new Map<String, dynamic>();
+
+    String username = 'Ask Kheyali for credential';
+    String password = 'Ask Kheyali for credential';
+    String base64Encoded = 'Basic ' +  base64.encode(utf8.encode("${username}:${password}"));
+    uploadFile["image"] = new UploadFileInfo(new File(filePath), "image.jpg");
+    reqHeaders["authorization"] =  base64Encoded;
+    Options reqOptions =new Options(
+        headers: reqHeaders
+    );
+    FormData formData = new FormData.from(uploadFile);
+    Dio dio = new Dio();
+    Response<String> response = await dio.post("https://waste-classifier-cs.cfapps.sap.hana.ondemand.com/classify",
+        data: formData,
+        options: reqOptions
+    );
+    String binImageName = parseResponseToGetBinName(response);
+    Navigator.of(context).push(
+        new MaterialPageRoute(builder: (context) {
+          return new Scaffold(
+            appBar:  new AppBar(title : new Text("your garbage goes to ..")
+            ),
+            body: new Column(
+              children: <Widget>[
+                new Padding(
+                  padding: const EdgeInsets.all(5.0),
+                  child: new Row(
+                    children: <Widget>[
+                      _thumbnailWidget(),
+                      new Image.asset('assets/arrow.png', scale: 3.0, width: 50.0, height:50.0),
+                      new Image.asset('assets/'+binImageName, scale: 3.0, width: 200.0, height: 200.0)
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          );
+        })
+    );
   }
 
   Future<String> takePicture() async {
@@ -227,25 +268,6 @@ class _CameraExampleHomeState extends State<CameraExampleHome> {
 
     try {
       await controller.takePicture(filePath);
-      Map<String, dynamic> reqHeaders = new Map<String, dynamic>();
-      Map<String, dynamic> uploadFile = new Map<String, dynamic>();
-
-      String username = 'Ask Kheyali for credential';
-      String password = 'Ask Kheyali for credential';
-      String base64Encoded = 'Basic ' +  base64.encode(utf8.encode("${username}:${password}"));
-      uploadFile["image"] = new UploadFileInfo(new File(filePath), "image.jpg");
-      reqHeaders["authorization"] =  base64Encoded;
-      Options reqOptions =new Options(
-          headers: reqHeaders
-      );
-      FormData formData = new FormData.from(uploadFile);
-      Dio dio = new Dio();
-      Response<String> response = await dio.post("https://waste-classifier-cs.cfapps.sap.hana.ondemand.com/classify",
-          data: formData,
-          options: reqOptions
-      );
-      String binImageName = parseResponseToGetBinName(response);
-
     } on CameraException catch (e) {
       _showCameraException(e);
       return null;
@@ -277,7 +299,7 @@ String getBinImageName (classificationList) {
    switch(classificationList[0]) {
      case "foodscrape":
        return "foodscrape.jpg";
-     case "cardboard cartoon" :
+     case "cardboard carton" :
      case "paper":
      case "news paper":
      case "napkin":
