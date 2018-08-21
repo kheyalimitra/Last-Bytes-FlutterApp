@@ -359,7 +359,7 @@ class CameraApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return new MaterialApp(
-      home: new CameraExampleHome(),
+      home: new CameraExampleHome(), debugShowCheckedModeBanner: false // helps to stop showing "Debug banner in screen"
     );
   }
 }
