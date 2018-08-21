@@ -209,6 +209,12 @@ class _CameraExampleHomeState extends State<CameraExampleHome> {
   }
 
   Future<String> classifyAndDisplay(filePath) async {
+    Response<String> response = await _getClassifiedResult(filePath);
+    String binImageName = parseResponseToGetBinName(response);
+    _generateResultScreen(binImageName);
+  }
+
+  Future<Response<String>> _getClassifiedResult(filePath) async {
     Map<String, dynamic> reqHeaders = new Map<String, dynamic>();
     Map<String, dynamic> uploadFile = new Map<String, dynamic>();
 
@@ -226,7 +232,10 @@ class _CameraExampleHomeState extends State<CameraExampleHome> {
         data: formData,
         options: reqOptions
     );
-    String binImageName = parseResponseToGetBinName(response);
+    return response;
+  }
+
+  void _generateResultScreen(String binImageName) {
     Navigator.of(context).push(
         new MaterialPageRoute(builder: (context) {
           return new Scaffold(
@@ -297,24 +306,48 @@ String getBinImageName (classificationList) {
 
 //  for (String label in classificationList) {
    switch(classificationList[0]) {
-     case "foodscrape":
-       return "foodscrape.jpg";
      case "cardboard carton" :
      case "paper":
-     case "news paper":
+     case "newspapers":
      case "napkin":
      case "paper cup":
+     case "paper roll":
+     case "paper":
+     case  "paper box":
+     case "shredded papers":
+     case "tissue paper":
+     case"calendar":
       return "paper.png";
+
+
      case "plastic bag":
      case "plastic cup":
      case "plastic box":
      case "plastic container":
+     case "plastic utensils":
+     case "plastic lid":
+     case "refundable bottle":
+     case "milk jug":
        return "plastic.png";
+
      case "glass":
      case "glass bottle":
        return "glass.png";
+
      case "metal can":
+     case "aluminum can":
+     case "refundable can":
+     case "aluminum tray":
        return "metal.png";
+
+     case "chopsticks":
+     case "food scraps":
+     case "tea bag":
+       return "foodscrape.png";
+
+     case "candy wrappers":
+     case "styrofoam box":
+     case "tetra pak":
      default:
        return "landfill.jpg";
    }
