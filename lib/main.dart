@@ -348,7 +348,7 @@ String getBinImageName (classificationList) {
 
      case "candy wrappers":
      case "styrofoam box":
-     case "tetra pak":
+     case "tetra pack":
      default:
        return "landfill.jpg";
    }
