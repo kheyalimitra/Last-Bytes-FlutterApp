@@ -210,8 +210,9 @@ class _CameraExampleHomeState extends State<CameraExampleHome> {
 
   Future<String> classifyAndDisplay(filePath) async {
     Response<String> response = await _getClassifiedResult(filePath);
-    String binImageName = parseResponseToGetBinName(response);
-    _generateResultScreen(binImageName);
+     List<String> classificationList = parseResponseToGetBinName(response);
+    String binImageName = getBinImageName (classificationList);
+    _generateResultScreen(binImageName, classificationList[0]);
   }
 
   Future<Response<String>> _getClassifiedResult(filePath) async {
@@ -235,11 +236,11 @@ class _CameraExampleHomeState extends State<CameraExampleHome> {
     return response;
   }
 
-  void _generateResultScreen(String binImageName) {
+  void _generateResultScreen(String binImageName, String label) {
     Navigator.of(context).push(
         new MaterialPageRoute(builder: (context) {
           return new Scaffold(
-            appBar:  new AppBar(title : new Text("your garbage goes to ..")
+            appBar:  new AppBar(title : new Text( label + " goes to ..")
             ),
             body: new Column(
               children: <Widget>[
@@ -292,13 +293,13 @@ class _CameraExampleHomeState extends State<CameraExampleHome> {
 
 
   /// A function that will convert a response body into a List<ClassifiedObject> and then map the image name
-  String parseResponseToGetBinName(Response responseBody) {
+  List<String> parseResponseToGetBinName(Response responseBody) {
     List<String> classificationList = new List();
     Map parsedJsonObj = jsonDecode(responseBody.data);
     for (var entry in parsedJsonObj["result"]) {
         classificationList.add(entry.values.first);
     }
-    return getBinImageName (classificationList);
+    return classificationList;
 
 }
 
