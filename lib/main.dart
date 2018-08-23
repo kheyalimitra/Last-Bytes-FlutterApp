@@ -327,6 +327,7 @@ String getBinImageName (classificationList) {
      case "plastic container":
      case "plastic utensils":
      case "plastic lid":
+     case "plastic bottle":
      case "refundable bottle":
      case "milk jug":
        return "plastic.png";
